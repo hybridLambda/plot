@@ -28,6 +28,7 @@ enum FIGURE_PROGRAM { NO_METHOD, LATEX, DOT };
 
 class Figure{
     friend class HybridLambda;
+    friend class HybridCoal;
     #ifdef UNITTEST
     friend class TestFigure;
     #endif
