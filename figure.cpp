@@ -161,7 +161,7 @@ void Figure::plot_core(){
     for ( size_t node_i = 0; node_i < this->obj_net->NodeContainer.size()-1; node_i++ ){
         string sp_node_label = this->obj_net->NodeContainer[node_i].label;
         sp_node_label=rm_and_hash_sign(sp_node_label);
-        string sp_node_parent1_label = this->obj_net->NodeContainer[node_i].parent1_()->label;
+        string sp_node_parent1_label = this->obj_net->NodeContainer[node_i].parent1->label;
         sp_node_parent1_label=rm_and_hash_sign(sp_node_parent1_label);
         this->edge_entry(sp_node_label, sp_node_parent1_label, obj_net->NodeContainer[node_i].e_num(), obj_net->NodeContainer[node_i].brchlen1(), !obj_net->NodeContainer[node_i].tip_bool);
         if (obj_net->NodeContainer[node_i].parent2){
