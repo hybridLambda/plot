@@ -119,9 +119,9 @@ void Figure::plot_in_latex( ){
 		//else{
 			//figure_ofstream<<"\\node at ("<<x_node[node_i]<<"\\du,"<<graph->NodeContainer[node_i].rank() << "\\du) [circle,fill=orange,draw] ("<<sp_node_label <<") {$"<<sp_node_label <<"$};\n";
 		//}
-        figure_ofstream << "\\node at (" << x_node[node_i] << "\\du," << (*it)->rank() << "\\du) [circle,fill=" 
-                        << ( (*it)->is_tip() ? "":"orange" ) 
-                        << ",draw] (" <<sp_node_label <<") {$"<<sp_node_label <<"$};\n";
+        figure_ofstream << "\\node at (" << x_node[node_i] << "\\du," << (*it)->rank() << "\\du) [circle," 
+                        << ( (*it)->is_tip() ? "" : "fill = orange" ) 
+                        << ",draw] (" << sp_node_label <<") {$" << sp_node_label << "$};\n";
         node_i++;
 	}
     this->plot_core();	    
@@ -230,7 +230,6 @@ void  Figure::det_x_node ( ){
 		this->x_node_tmp_index.clear();
         size_t node_i = 0;
         for ( auto it = this->graph->nodes_.iterator(); it.good(); ++it){
-		//for ( size_t node_i = 0; node_i < this->graph->NodeContainer.size(); node_i++ ){
             if ( (*it)->rank() == rank_i){
                 dout << " Node " <<  (*it)->label <<", "<< (*it) << "(rank = "<< (*it)->rank()<<")" <<endl;
                 assert((*it)->print_dout());dout<<endl;
@@ -258,12 +257,11 @@ void  Figure::det_x_node ( ){
 
 				this->x_node_tmp.push_back(x_node[node_i]);
 				this->x_node_tmp_index.push_back(node_i);
+                
 			}
-            else {
-                continue;
-            }
-            dout << endl;
+
             node_i++;
+            dout << endl;            
 		}
         this->x_node_shift();
 	}
