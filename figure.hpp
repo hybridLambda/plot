@@ -20,7 +20,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "net.hpp"
+#include "graph.hpp"
 #include <iostream> // clog
 
 enum FIGURE_OPTION { PLOT_DEFAULT, BRANCH, LABEL};
@@ -45,7 +45,7 @@ class Figure{
     ofstream figure_ofstream;
     string figure_file_suffix;
     string figure_file_name;
-    Net* obj_net;
+    GraphBuilder* obj_net;
     
     // Methods    
     Figure ( int argc, char * const* argv );
