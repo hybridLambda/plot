@@ -100,22 +100,29 @@ void Figure::finalize(){
  */
 void Figure::plot_in_latex( ){
     figure_ofstream.open( this->figure_file_name.c_str(), ios::out | ios::app | ios::binary ); 
-	figure_ofstream << "\\documentclass[10pt]{article}\n";
-	figure_ofstream << "\\usepackage{tikz,graphics,graphicx,lscape,fullpage,multicol,setspace}\n \\singlespacing\n \\begin{document}\n ";	
-	figure_ofstream << "\\ifx\\du\\undefined\\newlength{\\du}\\fi\\setlength{\\du}{30\\unitlength}\n";
-	figure_ofstream << "\\begin{center}\n";
-    figure_ofstream << "\\begin{tikzpicture}[thick]\n";
-    //this->obj_net->print_all_node();
+	figure_ofstream << "\\documentclass[10pt]{article}\n"
+                    << "\\usepackage{tikz,graphics,graphicx,lscape,fullpage,multicol,setspace}\n "
+                    << "\\singlespacing\n "
+                    << "\\begin{document}\n "
+                    << "\\ifx\\du\\undefined\\newlength{\\du}\\fi\\setlength{\\du}{30\\unitlength}\n"
+	                << "\\begin{center}\n"
+                    << "\\begin{tikzpicture}[thick]\n";
+    //this->graph->print_all_node();
     this->det_x_node ( );
-	for (size_t node_i = 0; node_i < this->obj_net->NodeContainer.size();node_i++){
-		string sp_node_label = this->obj_net->NodeContainer[node_i].label;
+    size_t node_i = 0;
+	for ( auto it = this->graph->nodes_.iterator(); it.good(); ++it){
+		string sp_node_label = (*it)->label;
 		sp_node_label=rm_and_hash_sign(sp_node_label);
-		if (obj_net->NodeContainer[node_i].tip_bool){
-			figure_ofstream<<"\\node at ("<<x_node[node_i]<<"\\du,"<<obj_net->NodeContainer[node_i].rank() << "\\du) [circle,draw] ("<<sp_node_label <<") {$"<<sp_node_label <<"$};\n";
-		}
-		else{
-			figure_ofstream<<"\\node at ("<<x_node[node_i]<<"\\du,"<<obj_net->NodeContainer[node_i].rank() << "\\du) [circle,fill=orange,draw] ("<<sp_node_label <<") {$"<<sp_node_label <<"$};\n";
-		}
+		//if (graph->NodeContainer[node_i].tip_bool){
+			//figure_ofstream<<"\\node at ("<<x_node[node_i]<<"\\du,"<<graph->NodeContainer[node_i].rank() << "\\du) [circle,draw] ("<<sp_node_label <<") {$"<<sp_node_label <<"$};\n";
+		//}
+		//else{
+			//figure_ofstream<<"\\node at ("<<x_node[node_i]<<"\\du,"<<graph->NodeContainer[node_i].rank() << "\\du) [circle,fill=orange,draw] ("<<sp_node_label <<") {$"<<sp_node_label <<"$};\n";
+		//}
+        figure_ofstream << "\\node at (" << x_node[node_i] << "\\du," << (*it)->rank() << "\\du) [circle,fill=" 
+                        << ( (*it)->is_tip() ? "":"orange" ) 
+                        << ",draw] (" <<sp_node_label <<") {$"<<sp_node_label <<"$};\n";
+        node_i++;
 	}
     this->plot_core();	    
    	figure_ofstream <<"\\end{tikzpicture}\n\n";
@@ -158,37 +165,41 @@ void Figure::edge_entry(string from, string to, size_t label, double bl, bool ti
 
 
 void Figure::plot_core(){
-    for ( size_t node_i = 0; node_i < this->obj_net->NodeContainer.size()-1; node_i++ ){
-        string sp_node_label = this->obj_net->NodeContainer[node_i].label;
+    for ( auto it = this->graph->nodes_.iterator(); it.good(); ++it){
+        if ( (*it)->parent1() == NULL ) break;
+        dout << "Node "<< (*it) <<endl;
+        string sp_node_label = (*it)->label;
         sp_node_label=rm_and_hash_sign(sp_node_label);
-        string sp_node_parent1_label = this->obj_net->NodeContainer[node_i].parent1->label;
+        string sp_node_parent1_label = (*it)->parent1()->label;
         sp_node_parent1_label=rm_and_hash_sign(sp_node_parent1_label);
-        this->edge_entry(sp_node_label, sp_node_parent1_label, obj_net->NodeContainer[node_i].e_num(), obj_net->NodeContainer[node_i].brchlen1(), !obj_net->NodeContainer[node_i].tip_bool);
-        if (obj_net->NodeContainer[node_i].parent2){
-            string sp_node_parent2_label=obj_net->NodeContainer[node_i].parent2->label;
-            sp_node_parent2_label=rm_and_hash_sign(sp_node_parent2_label);
-            this->edge_entry( sp_node_label, sp_node_parent2_label, obj_net->NodeContainer[node_i].e_num2(), obj_net->NodeContainer[node_i].brchlen2(), !obj_net->NodeContainer[node_i].tip_bool);
-        }
+        this->edge_entry(sp_node_label, sp_node_parent1_label, (*it)->e_num(), (*it)->brchlen1(), !(*it)->is_tip());
+        if ( (*it)->parent2() == NULL ) continue;
+        
+        string sp_node_parent2_label=(*it)->parent2()->label;
+        sp_node_parent2_label=rm_and_hash_sign(sp_node_parent2_label);
+        this->edge_entry( sp_node_label, sp_node_parent2_label, (*it)->e_num2(), (*it)->brchlen2(), !(*it)->is_tip());
 	}
+    dout << "plot_core finished"<<endl;
 }
 
 /*! \brief Produce a dot file, which is used to draw the network, and compile the dot file to a pdf file.
  */
 void Figure::plot_in_dot( ){
+    dout << " in plot_in_dot() "<<endl;
     figure_ofstream.open ( this->figure_file_name.c_str(), ios::out | ios::app | ios::binary ); 
 	figure_ofstream <<"graph G {\n rankdir=BT; ratio=compress;\n";//page="14,14"; determines the size of the ps output
 
     this->plot_core();	
 
-	if (this->obj_net->is_ultrametric){
-		for (size_t rank_i = this->obj_net->NodeContainer.back().rank(); rank_i > 0; rank_i--){
+    dout <<"ok it's here"<<endl;
+	if (this->graph->is_ultrametric){
+		for (size_t rank_i = this->graph->nodes_.back()->rank(); rank_i > 0; rank_i--){
 			figure_ofstream<<"{ rank=same; ";
-			for (size_t node_i=0;node_i<obj_net->NodeContainer.size();node_i++){
-				if (obj_net->NodeContainer[node_i].rank() == rank_i){
-					string sp_node_label = obj_net->NodeContainer[node_i].label;
-					sp_node_label = rm_and_hash_sign(sp_node_label);
-					figure_ofstream << sp_node_label << " ";
-				}	
+			for ( auto it = this->graph->nodes_.iterator(); it.good(); ++it){
+				if ( (*it)->rank() != rank_i) continue;
+                string sp_node_label = (*it)->label;
+                sp_node_label = rm_and_hash_sign(sp_node_label);
+                figure_ofstream << sp_node_label << " ";
 			}
 			figure_ofstream<<"} ;\n";
 		}
@@ -211,18 +222,19 @@ void Figure::execute_dot(string method, string suffix){
 /*! \brief When drawing network in .tex files, detemine the x coordinates of nodes
  */
 void  Figure::det_x_node ( ){
-    this->x_node = valarray <int> (this->obj_net->NodeContainer.size());
+    this->x_node = valarray <int> (this->graph->nodes_.size());
     x_node[x_node.size()-1] = 0; //root x-axis value is zero
 
-	for ( size_t rank_i = this->obj_net->NodeContainer.back().rank(); rank_i > 0; rank_i-- ){ // start from the children of the root
+	for ( size_t rank_i = this->graph->nodes_.back()->rank(); rank_i > 0; rank_i-- ){ // start from the children of the root
 		this->x_node_tmp.clear();
 		this->x_node_tmp_index.clear();
-        
-		for ( size_t node_i = 0; node_i < this->obj_net->NodeContainer.size(); node_i++ ){
-            if ( this->obj_net->NodeContainer[node_i].rank() == rank_i){
-                dout << " Node " <<  this->obj_net->NodeContainer[node_i].label <<", "<< &(this->obj_net->NodeContainer[node_i]) << "(rank = "<< this->obj_net->NodeContainer[node_i].rank()<<")" <<endl;
-                assert(this->obj_net->NodeContainer[node_i].print_dout());dout<<endl;
-                size_t n_child = this->obj_net->NodeContainer[node_i].child.size();
+        size_t node_i = 0;
+        for ( auto it = this->graph->nodes_.iterator(); it.good(); ++it){
+		//for ( size_t node_i = 0; node_i < this->graph->NodeContainer.size(); node_i++ ){
+            if ( (*it)->rank() == rank_i){
+                dout << " Node " <<  (*it)->label <<", "<< (*it) << "(rank = "<< (*it)->rank()<<")" <<endl;
+                assert((*it)->print_dout());dout<<endl;
+                size_t n_child = (*it)->child.size();
                 int parent_x = x_node[node_i];
                 int start_child_x = parent_x - floor( n_child / 2 );
 
@@ -230,10 +242,9 @@ void  Figure::det_x_node ( ){
                 dout << "parent x = " << parent_x <<" " << "start_child_x = "<<start_child_x <<" "<<endl;
                 for ( size_t child_i = 0; child_i < n_child; child_i++ ){                    
                     dout << " child_"<<child_i << ",  x = " ;
-                    for ( size_t node_j = 0; node_j < this->obj_net->NodeContainer.size(); node_j++ ){
-                        //if ( node_j == this->obj_net->NodeContainer[node_i].child[child_i]->node_index ){
-                        //cout<<"this->obj_net->NodeContainer[node_i].child[child_i]="<<this->obj_net->NodeContainer[node_i].child[child_i] << " &this->obj_net->NodeContainer["<<node_j<<"]"<<&this->obj_net->NodeContainer[node_j]<<endl;
-                        if ( &this->obj_net->NodeContainer[node_j] == this->obj_net->NodeContainer[node_i].child[child_i] ){
+                    for ( size_t node_j = 0; node_j < this->graph->nodes_.size(); node_j++ ){
+                        //cout<<"(*it)->child[child_i]="<<(*it)->child[child_i] << " &this->graph->NodeContainer["<<node_j<<"]"<<&this->graph->NodeContainer[node_j]<<endl;
+                        if ( this->graph->nodes_.at(node_j) == (*it)->child[child_i] ){
                             if ( !odd_num_child && start_child_x == parent_x ){
                                 start_child_x++;
                             }
@@ -252,6 +263,7 @@ void  Figure::det_x_node ( ){
                 continue;
             }
             dout << endl;
+            node_i++;
 		}
         this->x_node_shift();
 	}
@@ -300,7 +312,8 @@ void Figure::x_node_shift(){
 
 void Figure::plot( string net_str ){
     if ( net_str.size() == 0 ) { throw std::invalid_argument ("Population structure is undefined!!!");}
-	this->obj_net = new Net (net_str);
+	this->graph = new GraphBuilder (net_str);
+    this->graph->check_isUltrametric();
 	if ( this->method == LATEX ){ this->plot_in_latex(); }
 	if ( this->method == DOT   ){ this->plot_in_dot();   }
 	

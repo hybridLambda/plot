@@ -45,11 +45,11 @@ class Figure{
     ofstream figure_ofstream;
     string figure_file_suffix;
     string figure_file_name;
-    GraphBuilder* obj_net;
+    GraphBuilder* graph;
     
     // Methods    
     Figure ( int argc, char * const* argv );
-    ~Figure(){ delete obj_net; }
+    ~Figure(){ delete graph; }
     void plot( string net_str );
     void init();
     void initialize_method( FIGURE_PROGRAM program, string suffix);
