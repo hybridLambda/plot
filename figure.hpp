@@ -20,8 +20,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "net.hpp"
+#include "graph.hpp"
 #include <iostream> // clog
+
+#ifndef NDEBUG
+#define Figuredout (std::cout << " Figure ")
+#else
+#pragma GCC diagnostic ignored "-Wunused-value"
+#define Figuredout 0 && (std::cout << " Figure ")
+#endif
+
 
 enum FIGURE_OPTION { PLOT_DEFAULT, BRANCH, LABEL};
 enum FIGURE_PROGRAM { NO_METHOD, LATEX, DOT };
@@ -29,6 +37,7 @@ enum FIGURE_PROGRAM { NO_METHOD, LATEX, DOT };
 class Figure{
     friend class HybridLambda;
     friend class HybridCoal;
+    friend class PlotApp;
     #ifdef UNITTEST
     friend class TestFigure;
     #endif
@@ -45,11 +54,11 @@ class Figure{
     ofstream figure_ofstream;
     string figure_file_suffix;
     string figure_file_name;
-    Net* obj_net;
+    GraphBuilder* graph;
     
     // Methods    
     Figure ( int argc, char * const* argv );
-    ~Figure(){ delete obj_net; }
+    ~Figure(){ if ( graph != NULL ) delete graph; }
     void plot( string net_str );
     void init();
     void initialize_method( FIGURE_PROGRAM program, string suffix);
@@ -86,3 +95,73 @@ class Figure{
         return in_str;
     }
 };
+
+class PlotApp{
+    int argc_;
+    int argc_i;
+    char * const* argv_;
+    string tmp_input_str;
+    string net_str;
+    string prefix;
+
+    void print_help(){
+        cout << "USAGE:" << endl;
+        cout << "./plot -graph \"((1:1,2:1):1,3:2);\" -dot -branch" <<endl;
+    }
+    
+    void init(){
+        this->prefix  = "OUT";
+        this->argc_i  = 1;
+        //this->net_str = "";
+    }
+    
+    void parse(){
+        while (argc_i < argc_){	
+            std::string argv_i(argv_[argc_i]);
+            if ( argv_i == "-h" || argv_i == "-help" ){ print_help(); }
+            else if ( argv_i =="-graph" ){ readNextStringto( this->tmp_input_str , this->argc_i, this->argc_,  this->argv_ );
+                                           this->net_str = read_input_line(tmp_input_str.c_str());
+                                          }
+            else if ( argv_i =="-o" )    { readNextStringto( this->prefix , this->argc_i, this->argc_,  this->argv_ ); }
+            else if ( argv_i =="-label" || argv_i =="-branch" || argv_i =="-dot" || argv_i =="-plot" ) { argc_i++; continue;}
+            //else if ( argv_i == "-print" ){ this->print_tree_bool = true; }
+            else { throw std::invalid_argument ( "Unknown flag:" + argv_i); }
+            //else { cout <<"  need to change this !!!" << argv_i<<endl; argc_i++;continue; } // need to change this !!!
+            argc_i++;
+        }
+    
+    }
+    void finalize(){
+        Figure figure_para ( this->argc_, this->argv_ );
+        figure_para.figure_file_prefix = this->prefix;
+        figure_para.finalize();
+        figure_para.plot( this->net_str );
+    }
+  
+    string read_input_line(const char *inchar){
+	string out_str;
+    ifstream in_file( inchar );
+	if (in_file.good())	getline ( in_file, out_str); 
+	else{
+		string dummy_str(inchar);
+		if (dummy_str.find('(')!=string::npos && dummy_str.find(')')!=string::npos) out_str=dummy_str;
+		else  throw std::invalid_argument("Invalid input file. " + string (inchar) );
+	}
+	in_file.close();			
+    return 	out_str;
+    }
+  
+  public:
+    PlotApp ( int argc, char *argv[]) : argc_(argc), argv_(argv) {
+        if ( argc_ == 1 ){
+            print_help();
+            return;
+        }
+            
+        this->init();
+        this->parse();
+        this->finalize();
+    }
+    ~PlotApp (){}    
+};
+
