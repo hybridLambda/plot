@@ -38,3 +38,4 @@ plot
 *.aux
 *.log
 plot_dbg
+unittest
