@@ -81,10 +81,14 @@ void Figure::init(){
      this->option = PLOT_DEFAULT;
      this->method = NO_METHOD;
      this->argc_i = 1;
+     this->graph  = NULL;
     }
 
 /*! Check and remove files*/
 void Figure::finalize(){
+    if ( method == NO_METHOD ){
+        throw std::invalid_argument ( "Plot method undefined, use flag \"-plot\" or \"-dot\"" );
+    }
     size_t found =  this->figure_file_prefix.find( this->figure_file_suffix );
 	if ( found != string::npos ){
         this->figure_file_prefix = this->figure_file_prefix.substr(0,found);
@@ -130,7 +134,7 @@ void Figure::plot_in_latex( ){
 	figure_ofstream << "\\end{document}\n";
 	figure_ofstream.close();
 	
-	string command = "pdflatex " + this->figure_file_name;
+	string command = "pdflatex " + this->figure_file_name + " > /dev/null";
 	int sys=system(command.c_str());
     std::clog << "Network figure generated in file: " + this->figure_file_name << endl; 
 }
@@ -309,7 +313,9 @@ void Figure::x_node_shift(){
 
 
 void Figure::plot( string net_str ){
-    if ( net_str.size() == 0 ) { throw std::invalid_argument ("Population structure is undefined!!!");}
+    if ( net_str.size() == 0 || net_str == "" ) {
+        throw std::invalid_argument ("Population structure is undefined!!!");
+    }
 	this->graph = new GraphBuilder (net_str);
     this->graph->check_isUltrametric();
 	if ( this->method == LATEX ){ this->plot_in_latex(); }

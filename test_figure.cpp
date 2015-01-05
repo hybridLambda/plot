@@ -37,11 +37,11 @@ class TestFigure : public CppUnit::TestCase {
  private:
 
     void good_CMD() {
-        char* argv1[] = { "hybrid-Lambda", "-spcu", "trees/7_tax_sp_nt1_para", "-dotF", "blah", "-branch", "-label" };
+        char* argv1[] = { "./plot", "-graph", "trees/7_tax_sp_nt1_para", "-dotF", "blah", "-branch", "-label" };
         CPPUNIT_ASSERT_NO_THROW ( Figure( 6, argv1 ) ); 
         CPPUNIT_ASSERT_NO_THROW ( Figure( 5, argv1 ) );
 
-        char* argv2[] = { "hybrid-Lambda", "-spcu", "trees/7_tax_sp_nt1_para", "-dotF", "blah", "-label", "-branch" };
+        char* argv2[] = { "./plot", "-graph", "trees/7_tax_sp_nt1_para", "-dotF", "blah", "-label", "-branch" };
         CPPUNIT_ASSERT_NO_THROW ( Figure( 6, argv1 ) ); 
         CPPUNIT_ASSERT_NO_THROW ( Figure( 5, argv1 ) );
 
@@ -49,7 +49,7 @@ class TestFigure : public CppUnit::TestCase {
     }
     
     void bad_CMD(){
-        char* argv1[] = { "hybrid-Lambda", "-spcu", "trees/7_tax_sp_nt1_para", "-dotF", "blah", "-branch", "-label" };
+        char* argv1[] = { "./plot", "-graph", "trees/7_tax_sp_nt1_para", "-dotF", "blah", "-branch", "-label" };
         CPPUNIT_ASSERT_THROW ( Figure( 7, argv1 ) , std::invalid_argument ); // too many options
         CPPUNIT_ASSERT_THROW ( Figure( 4, argv1 ) , std::invalid_argument ); // missing file name for -dotF
     }

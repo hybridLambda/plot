@@ -29,3 +29,12 @@
 
 .deps/
 .dirstamp
+*.dot
+*.eps
+*.tex
+*.pdf
+*.ps
+plot
+*.aux
+*.log
+plot_dbg
