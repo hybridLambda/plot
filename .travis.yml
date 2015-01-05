@@ -13,4 +13,4 @@ before_install:
   - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install llvm cppunit graphviz valgrind && brew link --force llvm; fi
 script:
   - make
-
+  - make unittest; ./unittest
