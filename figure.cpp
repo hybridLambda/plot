@@ -217,10 +217,13 @@ void Figure::plot_in_dot( ){
 	std::clog << "Dot figure generated in file: " + this->figure_file_prefix + ".pdf" << endl;
 }
 
-void Figure::execute_dot(string method, string suffix){
+void Figure::execute_dot( string method, string suffix ){
 	string command = "dot -T" + method + " " + this->figure_file_prefix + ".dot -o " + this->figure_file_prefix + suffix;
 	int sys = system( command.c_str() );
+    if ( sys == 32512 ){
+        throw std::invalid_argument ( command );
     }
+}
 
 
 /*! \brief When drawing network in .tex files, detemine the x coordinates of nodes
