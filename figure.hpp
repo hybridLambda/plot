@@ -1,11 +1,11 @@
 /*
- * hybrid-Lambda is used to simulate gene trees given species network under 
+ * hybrid-Lambda is used to simulate gene trees given species network under
  * coalescent process.
- * 
+ *
  * Copyright (C) 2010 -- 2014 Sha (Joe) Zhu
- * 
+ *
  * This file is part of hybrid-Lambda.
- * 
+ *
  * hybrid-Lambda is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -15,7 +15,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -44,7 +44,7 @@ class Figure{
     // Members
     string figure_file_prefix;
     FIGURE_PROGRAM method;
-    FIGURE_OPTION option;    
+    FIGURE_OPTION option;
     int argc_;
     int argc_i;
     char * const* argv_;
@@ -55,8 +55,8 @@ class Figure{
     string figure_file_suffix;
     string figure_file_name;
     GraphBuilder* graph;
-    
-    // Methods    
+
+    // Methods
     Figure ( int argc, char * const* argv );
     ~Figure(){ if ( graph != NULL ) delete graph; }
     void plot( string net_str );
@@ -96,6 +96,48 @@ class Figure{
     }
 };
 
+
+struct InvalidInFile : public InvalidInput{
+  InvalidInFile( string str ):InvalidInput( str ){
+    this->reason = "Invalid input file: ";
+  }
+  ~InvalidInFile(){}
+};
+
+
+struct MethodUndefined : public InvalidInput{
+  MethodUndefined( ):InvalidInput( ){
+    this->reason = "Plot method undefined, use flag \"-plot\" or \"-dot\".";
+  }
+  ~MethodUndefined(){}
+};
+
+
+struct TooManyOption : public InvalidInput{
+  TooManyOption( ):InvalidInput( ){
+    this->reason = "Too many figure options! Plot option can either be \"-label\" or \"-branch\".";
+  }
+  ~TooManyOption(){}
+};
+
+
+struct TooManyMethod : public InvalidInput{
+  TooManyMethod( ):InvalidInput( ){
+    this->reason = "Method can either be LaTex (\"-plot\" or \"-plotF\") or DOT (\"-dot\" or \"-dotF\").";
+  }
+  ~TooManyMethod(){}
+};
+
+
+struct MissingPopStruct : public InvalidInput{
+  MissingPopStruct( ):InvalidInput( ){
+    this->reason = "Population structure is undefined!!!";
+  }
+  ~MissingPopStruct(){}
+};
+
+
+
 class PlotApp{
     int argc_;
     int argc_i;
@@ -108,15 +150,15 @@ class PlotApp{
         cout << "USAGE:" << endl;
         cout << "./plot -graph \"((1:1,2:1):1,3:2);\" -dot -branch" <<endl;
     }
-    
+
     void init(){
         this->prefix  = "OUT";
         this->argc_i  = 1;
         //this->net_str = "";
     }
-    
+
     void parse(){
-        while (argc_i < argc_){	
+        while (argc_i < argc_){
             std::string argv_i(argv_[argc_i]);
             if ( argv_i == "-h" || argv_i == "-help" ){ print_help(); }
             else if ( argv_i =="-graph" ){ readNextStringto( this->tmp_input_str , this->argc_i, this->argc_,  this->argv_ );
@@ -125,11 +167,11 @@ class PlotApp{
             else if ( argv_i =="-o" )    { readNextStringto( this->prefix , this->argc_i, this->argc_,  this->argv_ ); }
             else if ( argv_i =="-label" || argv_i =="-branch" || argv_i =="-dot" || argv_i =="-plot" ) { argc_i++; continue;}
             //else if ( argv_i == "-print" ){ this->print_tree_bool = true; }
-            else { throw std::invalid_argument ( "Unknown flag:" + argv_i); }
+            else { throw UnknowArg(argv_i); }
             //else { cout <<"  need to change this !!!" << argv_i<<endl; argc_i++;continue; } // need to change this !!!
             argc_i++;
         }
-    
+
     }
     void finalize(){
         Figure figure_para ( this->argc_, this->argv_ );
@@ -137,31 +179,31 @@ class PlotApp{
         figure_para.finalize();
         figure_para.plot( this->net_str );
     }
-  
+
     string read_input_line(const char *inchar){
-	string out_str;
+    string out_str;
     ifstream in_file( inchar );
-	if (in_file.good())	getline ( in_file, out_str); 
-	else{
-		string dummy_str(inchar);
-		if (dummy_str.find('(')!=string::npos && dummy_str.find(')')!=string::npos) out_str=dummy_str;
-		else  throw std::invalid_argument("Invalid input file. " + string (inchar) );
-	}
-	in_file.close();			
-    return 	out_str;
+    if (in_file.good()) getline ( in_file, out_str);
+    else{
+        string dummy_str(inchar);
+        if (dummy_str.find('(')!=string::npos && dummy_str.find(')')!=string::npos) out_str=dummy_str;
+        else throw InvalidInFile( string (inchar) );
     }
-  
+    in_file.close();
+    return     out_str;
+    }
+
   public:
     PlotApp ( int argc, char *argv[]) : argc_(argc), argv_(argv) {
         if ( argc_ == 1 ){
             print_help();
             return;
         }
-            
+
         this->init();
         this->parse();
         this->finalize();
     }
-    ~PlotApp (){}    
+    ~PlotApp (){}
 };
 
