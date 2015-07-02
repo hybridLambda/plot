@@ -176,12 +176,12 @@ void Figure::plot_core(){
         sp_node_label=rm_and_hash_sign(sp_node_label);
         string sp_node_parent1_label = (*it)->parent1()->label;
         sp_node_parent1_label=rm_and_hash_sign(sp_node_parent1_label);
-        this->edge_entry(sp_node_label, sp_node_parent1_label, (*it)->e_num(), (*it)->brchlen1(), !(*it)->is_tip());
+        this->edge_entry(sp_node_label, sp_node_parent1_label, (*it)->edge(), (*it)->brchlen1(), !(*it)->is_tip());
         if ( (*it)->parent2() == NULL ) continue;
         
         string sp_node_parent2_label=(*it)->parent2()->label;
         sp_node_parent2_label=rm_and_hash_sign(sp_node_parent2_label);
-        this->edge_entry( sp_node_label, sp_node_parent2_label, (*it)->e_num2(), (*it)->brchlen2(), !(*it)->is_tip());
+        this->edge_entry( sp_node_label, sp_node_parent2_label, (*it)->edge2(), (*it)->brchlen2(), !(*it)->is_tip());
 	}
     Figuredout << "plot_core finished"<<endl;
 }
