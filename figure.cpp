@@ -122,7 +122,7 @@ void Figure::plot_in_latex( ){
             //figure_ofstream<<"\\node at ("<<x_node[node_i]<<"\\du,"<<graph->NodeContainer[node_i].rank() << "\\du) [circle,fill=orange,draw] ("<<sp_node_label <<") {$"<<sp_node_label <<"$};\n";
         //}
         figure_ofstream << "\\node at (" << x_node[it.node_index()] << "\\du," << (*it)->rank() << "\\du) [circle,"
-                        << ( (*it)->is_tip() ? "" : "fill = orange" )
+                        << ( (*it)->isTip() ? "" : "fill = orange" )
                         << ",draw] (" << sp_node_label <<") {$" << sp_node_label << "$};\n";
         //node_i++;
     }
@@ -174,12 +174,12 @@ void Figure::plot_core(){
         sp_node_label=rm_and_hash_sign(sp_node_label);
         string sp_node_parent1_label = (*it)->parent1()->nodeName;
         sp_node_parent1_label=rm_and_hash_sign(sp_node_parent1_label);
-        this->edge_entry(sp_node_label, sp_node_parent1_label, (*it)->edge1.name(), (*it)->edge1.bl(), !(*it)->is_tip());
+        this->edge_entry(sp_node_label, sp_node_parent1_label, (*it)->edge1.name(), (*it)->edge1.bl(), !(*it)->isTip());
         if ( (*it)->parent2() == NULL ) continue;
 
         string sp_node_parent2_label=(*it)->parent2()->nodeName;
         sp_node_parent2_label=rm_and_hash_sign(sp_node_parent2_label);
-        this->edge_entry( sp_node_label, sp_node_parent2_label, (*it)->edge2.name(), (*it)->edge2.bl(), !(*it)->is_tip());
+        this->edge_entry( sp_node_label, sp_node_parent2_label, (*it)->edge2.name(), (*it)->edge2.bl(), !(*it)->isTip());
     }
     Figuredout << "plot_core finished"<<endl;
 }
