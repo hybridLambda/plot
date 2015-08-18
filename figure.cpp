@@ -111,7 +111,7 @@ void Figure::plot_in_latex( ){
                     << "\\begin{tikzpicture}[thick]\n";
     //this->graph->print_all_node();
     this->det_x_node ( );
-    //size_t node_i = 0;
+    size_t nodeIndex = 0;
     for ( auto it = this->graph->nodes_.iterator(); it.good(); ++it){
         string sp_node_label = (*it)->nodeName;
         sp_node_label=rm_and_hash_sign(sp_node_label);
@@ -121,10 +121,10 @@ void Figure::plot_in_latex( ){
         //else{
             //figure_ofstream<<"\\node at ("<<x_node[node_i]<<"\\du,"<<graph->NodeContainer[node_i].rank() << "\\du) [circle,fill=orange,draw] ("<<sp_node_label <<") {$"<<sp_node_label <<"$};\n";
         //}
-        figure_ofstream << "\\node at (" << x_node[it.node_index()] << "\\du," << (*it)->rank() << "\\du) [circle,"
+        figure_ofstream << "\\node at (" << x_node[nodeIndex] << "\\du," << (*it)->rank() << "\\du) [circle,"
                         << ( (*it)->isTip() ? "" : "fill = orange" )
                         << ",draw] (" << sp_node_label <<") {$" << sp_node_label << "$};\n";
-        //node_i++;
+        nodeIndex++;
     }
     this->plot_core();
        figure_ofstream <<"\\end{tikzpicture}\n\n";
